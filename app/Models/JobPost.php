@@ -23,4 +23,8 @@ class JobPost extends Model
         'description',
         'author'
     ];
+    public  function author()
+    {
+        return $this->belongsTo(User::class, 'id');
+    }
 }

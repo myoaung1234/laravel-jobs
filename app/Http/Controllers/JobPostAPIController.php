@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JobPost;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 
 class JobPostAPIController extends Controller
 {
@@ -11,10 +14,12 @@ class JobPostAPIController extends Controller
      */
     public function index()
     {
+        $posts = JobPost::with('author')->paginate();
+
         return response()->json([
             'success' => 'true',
             'message' => 'Data retrieved successfully',
-            'data' => [],
+            'data' => $posts,
         ]);
     }
 
@@ -23,9 +28,29 @@ class JobPostAPIController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(),[
+            'title' => 'required',
+            'company' => 'required',
+            'category' => 'required',
+            'description' => 'required'
+        ]);
+
+        if( $validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $form_data = $request->all();
+        $form_data['author'] = auth()->user()->id;
+
+        JobPost::create($form_data);
+
         return response()->json([
             'success' => 'true',
-            'message' => 'Data retrieved successfully',
+            'message' => 'Data saved successfully',
         ]);
     }
 
@@ -34,10 +59,12 @@ class JobPostAPIController extends Controller
      */
     public function show(string $id)
     {
+        $jobpost = JobPost::where("id",$id)->with('author')->get();
+
         return response()->json([
             'success' => 'true',
             'message' => 'Data retrieved successfully',
-            'data' => [],
+            'data' => $jobpost,
         ]);
     }
 
@@ -46,10 +73,27 @@ class JobPostAPIController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $validator = Validator::make($request->all(),[
+            'title' => 'required',
+            'company' => 'required',
+            'category' => 'required',
+            'description' => 'required'
+        ]);
+
+        if( $validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $form_data = $request->only('title', 'company', 'company_logo', 'category', 'salary', 'description');
+        $result = JobPost::where(["id" => $id])->update($form_data);
+
         return response()->json([
-            'success' => 'true',
-            'message' => 'Data updated successfully',
-            'data' => [],
+            'success' => $result ? true : false,
+            'message' => $result ? 'Data updated successfully' : 'Data update failure !!',
         ]);
     }
 
@@ -58,12 +102,11 @@ class JobPostAPIController extends Controller
      */
     public function destroy(string $id)
     {
-
+        $result = JobPost::destroy($id);
 
         return response()->json([
-            'success' => 'true',
-            'message' => 'Data deleted successfully',
-            'data' => [],
+            'success' => $result ? true : false,
+            'message' => $result ? 'Data deleted successfully' : "Data deleted failure !!",
         ]);
     }
 }
