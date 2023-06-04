@@ -25,6 +25,6 @@ class JobPost extends Model
     ];
     public  function author()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'author');
     }
 }
