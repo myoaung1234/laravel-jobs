@@ -12,13 +12,19 @@ class JobPostAPIController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $posts = JobPost::with('author')->paginate();
+        $limit = $request->get('limit') ? (int) $request->get('limit') : 10;
+        $offset = $request->get('offset') ? (int) $request->get('offset') : 0;
+
+        $posts = JobPost::with('author');
+        $postCount = $posts->count();
+        $posts = $posts->offset($offset)->limit($limit)->get();
 
         return response()->json([
             'success' => 'true',
             'message' => 'Data retrieved successfully',
+            'total' => $postCount,
             'data' => $posts,
         ]);
     }

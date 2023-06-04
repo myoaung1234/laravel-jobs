@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JobPostAPIController;
 use App\Http\Controllers\UserAPIController;
 use App\Models\JobPost;
+use App\Http\Controllers\ImageUploadAPIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,5 +26,8 @@ Route::delete('/jobs/{id}', [JobPostAPIController::class, 'destroy'])->middlewar
 
 Route::post('/register', [UserAPIController::class, 'register']);
 Route::post('/login', [UserAPIController::class, 'login']);
+
+Route::post('/image_upload', [ImageUploadAPIController::class, 'store']);
+
 
 
